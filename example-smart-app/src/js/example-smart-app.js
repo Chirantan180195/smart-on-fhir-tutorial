@@ -26,10 +26,15 @@
 
         $.when(pt, obv).done(function(patient, obv) {
           var byCodes = smart.byCodes(obv, 'code');
-          var gender = patient.gender;
+      var gender = patient.gender;
+      var dob = new Date(patient.birthDate);
+      var day = dob.getDate();
+      var monthIndex = dob.getMonth() + 1;
+      var year = dob.getFullYear();
 
-          var fname = '';
-          var lname = '';
+      var dobStr = monthIndex + '/' + day + '/' + year;
+      var fname = '';
+      var lname = '';
 
           if (typeof patient.name[0] !== 'undefined') {
             fname = patient.name[0].given.join(' ');
@@ -45,25 +50,34 @@
           var p = defaultPatient();
           p.birthdate = patient.birthDate;
           p.gender = gender;
+          p.age = parseInt(calculateAge(dob));
           p.fname = fname;
           p.lname = lname;
           p.height = getQuantityValueAndUnit(height[0]);
 
-          if (typeof systolicbp != 'undefined')  {
-            p.systolicbp = systolicbp;
-          }
+          if(typeof height[0] != 'undefined' && typeof height[0].valueQuantity.value != 'undefined' && typeof height[0].valueQuantity.unit != 'undefined') {
+        p.height = height[0].valueQuantity.value + ' ' + height[0].valueQuantity.unit;
+      }
 
-          if (typeof diastolicbp != 'undefined') {
-            p.diastolicbp = diastolicbp;
-          }
+      if(typeof systolicbp != 'undefined')  {
+        p.systolicbp = systolicbp;
+      }
 
-          p.hdl = getQuantityValueAndUnit(hdl[0]);
-          p.ldl = getQuantityValueAndUnit(ldl[0]);
+      if(typeof diastolicbp != 'undefined') {
+        p.diastolicbp = diastolicbp;
+      }
 
-          ret.resolve(p);
-        });
-      } else {
-        onError();
+      if(typeof hdl[0] != 'undefined' && typeof hdl[0].valueQuantity.value != 'undefined' && typeof hdl[0].valueQuantity.unit != 'undefined') {
+        p.hdl = hdl[0].valueQuantity.value + ' ' + hdl[0].valueQuantity.unit;
+      }
+
+      if(typeof ldl[0] != 'undefined' && typeof ldl[0].valueQuantity.value != 'undefined' && typeof ldl[0].valueQuantity.unit != 'undefined') {
+        p.ldl = ldl[0].valueQuantity.value + ' ' + ldl[0].valueQuantity.unit;
+      }
+      ret.resolve(p);
+    });
+  } else {
+    onError();
       }
     }
 
